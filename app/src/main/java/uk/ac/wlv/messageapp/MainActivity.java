@@ -18,11 +18,11 @@ import uk.ac.wlv.messageapp.Model.Message;
 
 public class MainActivity extends AppCompatActivity {
 
-    Button button;
-    RecyclerView recyclerView;
-    MessageAdapter adapter;
-    List<Message> messageList;
-    dbHelper db;
+    private Button button;
+    private RecyclerView recyclerView;
+    private MessageAdapter adapter;
+    private List<Message> messageList;
+    private dbHelper db;
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
@@ -35,11 +35,11 @@ public class MainActivity extends AppCompatActivity {
         db = new dbHelper(this);
         messageList = new ArrayList<>();
 
-        loadMessages();
-
         adapter = new MessageAdapter(this, messageList);
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
+
+        loadMessages();
 
         button.setOnClickListener(v -> {
             startActivity(new Intent(MainActivity.this, InsertActivity.class));
@@ -50,7 +50,6 @@ public class MainActivity extends AppCompatActivity {
         messageList.clear();
 
         Cursor cursor = db.getAllMessages();
-
         if (cursor != null && cursor.moveToFirst()) {
             do {
                 int id = cursor.getInt(cursor.getColumnIndexOrThrow(dbHelper.COLUMN_ID));
@@ -60,15 +59,15 @@ public class MainActivity extends AppCompatActivity {
 
                 messageList.add(new Message(id, title, content, imagePath));
             } while (cursor.moveToNext());
-
             cursor.close();
         }
+
+        adapter.notifyDataSetChanged();
     }
 
     @Override
     protected void onResume() {
         super.onResume();
         loadMessages();
-        adapter.notifyDataSetChanged();
     }
 }

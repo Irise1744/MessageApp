@@ -30,6 +30,7 @@ import java.io.File;
 import java.util.concurrent.ExecutionException;
 
 import uk.ac.wlv.messageapp.Database.dbHelper;
+import uk.ac.wlv.messageapp.Helper.ImageHelper;
 
 public class InsertActivity extends AppCompatActivity {
 
@@ -191,10 +192,16 @@ public class InsertActivity extends AppCompatActivity {
 
         if (requestCode == IMAGE_PICK_CODE && resultCode == RESULT_OK && data != null) {
             Uri imageUri = data.getData();
-            imagePath = imageUri.toString();
 
-            imagePreview.setVisibility(View.VISIBLE);
-            imagePreview.setImageURI(imageUri);
+            // ✅ COPY image into internal storage
+            imagePath = ImageHelper.saveImageToInternalStorage(this, imageUri);
+
+            if (imagePath != null) {
+                imagePreview.setVisibility(View.VISIBLE);
+                imagePreview.setImageURI(Uri.fromFile(new File(imagePath)));
+            } else {
+                Toast.makeText(this, "Failed to save image", Toast.LENGTH_SHORT).show();
+            }
         }
     }
 
