@@ -23,12 +23,18 @@ import uk.ac.wlv.messageapp.R;
 
 public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHolder> {
 
+    public interface OnItemClickListener {
+        void onItemClick(Message message);
+    }
+
     private final List<Message> messageList;
     private final Context context;
+    private final OnItemClickListener listener;
 
-    public MessageAdapter(Context context, List<Message> messageList) {
+    public MessageAdapter(Context context, List<Message> messageList, OnItemClickListener listener) {
         this.context = context;
         this.messageList = messageList;
+        this.listener = listener;
     }
 
     @NonNull
@@ -51,7 +57,7 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
             try {
                 if (imagePath.startsWith("content://")) {
-                    // Handle content URIs safely using temp file
+                    // Handle content URI safely
                     File file = getFileFromContentUri(context, Uri.parse(imagePath));
                     if (file != null) {
                         Glide.with(context)
@@ -64,7 +70,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                     }
 
                 } else if (imagePath.startsWith("/")) {
-                    // Local file path
                     File file = new File(imagePath);
                     if (file.exists()) {
                         Glide.with(context)
@@ -77,7 +82,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                     }
 
                 } else if (imagePath.startsWith("http://") || imagePath.startsWith("https://")) {
-                    // Network URL
                     Glide.with(context)
                             .load(imagePath)
                             .placeholder(R.drawable.ic_launcher_background)
@@ -90,9 +94,17 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
                 e.printStackTrace();
                 holder.imageView.setVisibility(View.GONE);
             }
+
         } else {
             holder.imageView.setVisibility(View.GONE);
         }
+
+        // Handle item click
+        holder.itemView.setOnClickListener(v -> {
+            if (listener != null) {
+                listener.onItemClick(message);
+            }
+        });
     }
 
     @Override
@@ -114,7 +126,6 @@ public class MessageAdapter extends RecyclerView.Adapter<MessageAdapter.ViewHold
 
     /**
      * Copy content URI to a temporary file in app cache.
-     * Returns the File or null if failed.
      */
     public static File getFileFromContentUri(Context context, Uri uri) {
         try {

@@ -35,7 +35,14 @@ public class MainActivity extends AppCompatActivity {
         db = new dbHelper(this);
         messageList = new ArrayList<>();
 
-        adapter = new MessageAdapter(this, messageList);
+        // Initialize adapter with click listener
+        adapter = new MessageAdapter(this, messageList, message -> {
+            // Open UpdateActivity with message ID
+            Intent intent = new Intent(MainActivity.this, UpdateActivity.class);
+            intent.putExtra("message_id", message.getId());
+            startActivity(intent);
+        });
+
         recyclerView.setLayoutManager(new LinearLayoutManager(this));
         recyclerView.setAdapter(adapter);
 
